@@ -1,0 +1,35 @@
+server:
+  port: ${SERVER_PORT:8080}
+
+spring:
+  r2dbc:
+    url: ${DB_R2DBC_URL:r2dbc:postgresql://localhost:5432/account_db}
+    username: ${DB_USERNAME:account_user}
+    password: ${DB_PASSWORD:account_pass}
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: account-service
+              uri: ${ACCOUNT_SERVICE_URI:lb://platon-microservice-account}
+              predicates:
+                - Path=/api/accounts/**
+            - id: products-service
+              uri: ${PRODUCTS_SERVICE_URL:http://localhost:8081}
+              predicates:
+                - Path=/api/products/**
+            - id: payments-service
+              uri: ${PAYMENTS_SERVICE_URL:http://localhost:8082}
+              predicates:
+                - Path=/api/payments/**
+
+jwt:
+  secret-key: ${JWT_SECRET_KEY:platon-local-secret-key-change-me-please-123456}
+  validity-in-ms: ${JWT_VALIDITY_IN_MS:3600000}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,gateway

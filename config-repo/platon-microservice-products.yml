@@ -1,0 +1,40 @@
+spring:
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    connection-timeout: 5s
+    listener:
+      simple:
+        default-requeue-rejected: false
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/account_db?currentSchema=products}
+    username: ${DB_USERNAME:account_user}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  sql:
+    init:
+      mode: never
+  data:
+    web:
+      pageable:
+        default-page-size: 20
+        max-page-size: 100
+server:
+  port: ${SERVER_PORT:8081}
+
+security:
+  admin:
+    username: ${ADMIN_USERNAME:admin}
+    password: ${ADMIN_PASSWORD:admin123}
+  user:
+    username: ${USER_USERNAME:student}
+    password: ${USER_PASSWORD:student123}
+
+app:
+  rabbitmq:
+    purchase:
+      exchange: platon.purchase.events
+      request-routing-key: purchase.requested
+      validation-queue: platon.products.purchase.validation

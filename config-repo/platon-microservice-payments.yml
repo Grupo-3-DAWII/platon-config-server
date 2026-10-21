@@ -1,0 +1,46 @@
+server:
+  port: ${SERVER_PORT:8082}
+
+spring:
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/account_db?currentSchema=payment}
+    username: ${DB_USERNAME:account_user}
+    password: ${DB_PASSWORD:account_pass}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        default_schema: payment
+    open-in-view: false
+  sql:
+    init:
+      mode: never
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:guest}
+    password: ${RABBITMQ_PASSWORD:guest}
+    connection-timeout: 5s
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    template:
+      mandatory: true
+
+eureka:
+  client:
+    enabled: ${EUREKA_ENABLED:false}
+
+app:
+  rabbitmq:
+    purchase:
+      exchange: platon.purchase.events
+      routing-key: purchase.created
+      queue: platon.purchase.created
+      publish-delay-ms: 5000
+    validation:
+      exchange: ${app.rabbitmq.purchase.exchange}
+      routing-key: purchase.requested
+      queue: platon.products.purchase.validation
+      timeout-ms: ${PURCHASE_VALIDATION_TIMEOUT_MS:10000}
