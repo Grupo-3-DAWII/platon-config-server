@@ -14,7 +14,7 @@ spring:
             - id: account-service
               uri: ${ACCOUNT_SERVICE_URI:lb://platon-microservice-account}
               predicates:
-                - Path=/api/accounts/**
+                - Path=/api/accounts/**,/api/roles/**
             - id: products-service
               uri: ${PRODUCTS_SERVICE_URL:http://localhost:8081}
               predicates:
@@ -22,7 +22,7 @@ spring:
             - id: payments-service
               uri: ${PAYMENTS_SERVICE_URL:http://localhost:8082}
               predicates:
-                - Path=/api/payments/**
+                - Path=/api/payments/**,/api/products-sold/**,/api/states-sold/**,/api/user-products/**
 
 jwt:
   secret-key: ${JWT_SECRET_KEY:platon-local-secret-key-change-me-please-123456}
