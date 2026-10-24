@@ -11,7 +11,7 @@ spring:
   datasource:
     url: ${DB_URL:jdbc:postgresql://localhost:5432/account_db?currentSchema=products}
     username: ${DB_USERNAME:account_user}
-    password: ${DB_PASSWORD}
+    password: ${DB_PASSWORD:account_pass}
     driver-class-name: org.postgresql.Driver
   sql:
     init:
