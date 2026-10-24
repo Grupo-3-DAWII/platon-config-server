@@ -1,0 +1,14 @@
+services:
+  app:
+    build: .
+    container_name: platon-config-server
+    restart: unless-stopped
+    environment:
+      EUREKA_SERVER_URL: http://host.docker.internal:8761/eureka/
+      CONFIG_REPOSITORY_PATH: file:/config-repo
+    volumes:
+      - ./config-repo:/config-repo:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    ports:
+      - "8888:8888"
