@@ -1,70 +1,67 @@
 # platon-config-server
 
-Config Server para centralizar la configuracion de los microservicios de Platon.
+Config Server que centraliza la configuración de los microservicios de Platon.
 
 ## Requisitos
 
-- Java 21 o superior
-- Maven 3.9 o superior
-- `platon-eureka-server` ejecutandose para registrarse en Eureka
+- **Local:** Java 25 (Maven no hace falta, el proyecto incluye `mvnw`).
+- **Docker:** Docker con Compose.
+- `platon-eureka-server` en ejecución, para que el Config Server se registre.
 
 ## Ejecutar
 
+Desde la carpeta del proyecto:
+
 ```bash
+# Con Maven Wrapper (Linux/macOS)
+./mvnw spring-boot:run
+
+# Con Maven Wrapper (Windows)
 .\mvnw.cmd spring-boot:run
+
+# Con Docker
+docker compose up -d --build
 ```
 
-El Config Server queda disponible en:
+Disponible en: <http://localhost:8888>
 
-```text
-http://localhost:8888
-```
+Con Docker, `config-repo/` se monta dentro del contenedor y Eureka se busca en el host (`host.docker.internal:8761`).
 
-## Configuracion
+## Configuración
 
-- Nombre de aplicacion: `platon-config-server`
-- Puerto: `8888`
-- Perfil activo: `native`
-- Repositorio local de configuraciones: `./config-repo`
-- Eureka Server: `http://localhost:8761/eureka/`
+| Dato | Valor | Variable para cambiarlo |
+| --- | --- | --- |
+| Puerto | `8888` | `SERVER_PORT` |
+| Eureka | `http://localhost:8761/eureka/` | `EUREKA_SERVER_URL` |
+| Repositorio de configuración | `./config-repo` (perfil `native`) | `CONFIG_REPOSITORY_PATH` |
 
-## Configuraciones centralizadas
+## Archivos en `config-repo/`
 
-Los clientes solo conservan su `spring.application.name` y la ruta del Config Server. El resto de configuracion vive en:
+Cada cliente conserva solo su `spring.application.name` y la URL del Config Server; todo lo demás vive aquí:
 
-- `config-repo/application.yml`: configuracion comun, como Eureka y Actuator
-- `config-repo/platon-api-gateway.yml`: puerto, rutas, R2DBC y JWT del gateway
-- `config-repo/platon-microservice-account.yml`: puerto y datasource del microservicio account
-- `config-repo/platon-microservice-payments.yml`: puerto, PostgreSQL, JPA, RabbitMQ y flujo de compras de Payments
+| Archivo | Contenido |
+| --- | --- |
+| `application.yml` | Común a todos: Eureka y Actuator |
+| `platon-api-gateway.yml` | Puerto, rutas, R2DBC y JWT |
+| `platon-microservice-account.yml` | Puerto y datasource |
+| `platon-microservice-products.yml` | Puerto, datasource, RabbitMQ y usuarios de seguridad |
+| `platon-microservice-payments.yml` | Puerto, datasource, JPA, RabbitMQ y flujo de compras |
 
-Puedes cambiar la ruta del repositorio de configuraciones sin editar el codigo:
+Los valores usan el formato `${VARIABLE:valor_por_defecto}`, así que se pueden sobrescribir con variables de entorno (`DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `RABBITMQ_HOST`, etc.). Los valores por defecto coinciden con el proyecto `DATABASE`.
 
-```bash
-$env:CONFIG_REPOSITORY_PATH="file:C:/config/platon"
-.\mvnw.cmd spring-boot:run
-```
+Los microservicios apuntan al Config Server con `CONFIG_SERVER_URL` (por defecto `http://localhost:8888`).
 
-## Orden recomendado
-
-1. Levantar `platon-eureka-server`
-2. Levantar `platon-config-server`
-3. Levantar los microservicios
-4. Levantar `platon-api-gateway`
-
-## Prueba rapida
-
-Con un archivo `config-repo/application.yml`, puedes consultar la configuracion con:
-
-```bash
-curl http://localhost:8888/application/default
-```
-
-## Configuracion de Payments
-
-Payments usa `spring.application.name=platon-microservice-payments` e importa obligatoriamente este Config Server mediante `CONFIG_SERVER_URL` (por defecto `http://localhost:8888`). Su YAML local no contiene ajustes de infraestructura.
+## Verificar
 
 ```bash
 curl http://localhost:8888/platon-microservice-payments/default
 ```
 
-Su archivo especifico conserva Eureka desactivado por defecto, Hibernate en modo validacion y Spring SQL Init desactivado. Las tablas y migraciones pertenecen a `../DATABASE`. Los valores de conexion pueden ajustarse con `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`, `RABBITMQ_HOST`, `RABBITMQ_PORT`, `RABBITMQ_USERNAME` y `RABBITMQ_PASSWORD`; el timeout usa `PURCHASE_VALIDATION_TIMEOUT_MS`.
+Cambia el nombre por el de cualquier otro servicio para ver su configuración.
+
+## Orden recomendado
+
+1. `platon-eureka-server`
+2. `platon-config-server`
+3. Microservicios
+4. `platon-api-gateway`
